@@ -14,6 +14,7 @@ static bool is_running = true;
 
 void usageExit() {
     // TODO: show usage
+    printf("Set argument with just one bytecode!\n");
     exit(1);
 }
 
@@ -22,6 +23,21 @@ void initFuncs(FunPtr *f, uint32_t cnt) {
     for (i = 0; i < cnt; i++) {
         f[i] = NULL;
     }
+
+    f[0x00] = halt;
+    f[0x10] = load;
+    f[0x20] = store;
+    f[0x30] = move;
+    f[0x40] = puti;
+    f[0x50] = add;
+    f[0x60] = sub;
+    f[0x70] = gt;
+    f[0x80] = ge;
+    f[0x90] = eq;
+    f[0xa0] = ite;
+    f[0xb0] = jump;
+    f[0xc0] = puts;
+    f[0xd0] = gets;
 
     // TODO: initialize function pointers
     // f[0x00] = halt;
@@ -43,7 +59,8 @@ int main(int argc, char** argv) {
     FunPtr f[NUM_FUNCS];
     FILE* bytecode;
     uint32_t* pc;
-
+    uint32_t len=0;
+	
     // There should be at least one argument.
     if (argc < 2) usageExit();
 
@@ -60,10 +77,20 @@ int main(int argc, char** argv) {
         perror("fopen");
         return 1;
     }
+    
+    fseek(bytecode,0,SEEK_END);
+    len = ftell(bytecode);  //find size of file.
+    fseek(bytecode,0,SEEK_SET);
+
+    fread(pc,4,len/4,bytecode);//Connect file pointer and integer pointer(Initialize pc)
 
     while (is_running) {
         // TODO: Read 4-byte bytecode, and set the pc accordingly
-        stepVMContext(&vm, &pc);
+	// If we reach end of file, we must escape loop.
+      stepVMContext(&vm, &pc);
+      
+      if(pc==NULL) // if instrcution fetch is finish, terminate program.
+      is_running = false;
     }
 
     fclose(bytecode);

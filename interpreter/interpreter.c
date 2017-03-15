@@ -24,24 +24,71 @@ void halt(struct VMContext* ctx, const uint32_t i){
 }
 
 void load(struct VMContext* ctx, const uint32_t i){
-    uint32_t value = EXTRACT_B3(*(ptr+(ctx->r[EXTRACT_B2(i)].value/4)));
+    uint32_t value = EXTRACT_B3(*(ptr+(ctx->r[EXTRACT_B2(i)].value)/4));
     ctx->r[EXTRACT_B1(i)].value = value;	
 }
 
 void store(struct VMContext* ctx, const uint32_t i){
-    *(ptr+(ctx->r[EXTRA_B1(i)].value/4)) = B0(ctx->r[EXTRA_B2(i)].value); 	
+    *(ptr+(ctx->r[EXTRACT_B1(i)].value)/4) = EXTRACT_B3(ctx->r[EXTRA_B2(i)].value); 	
 }
 
-void move(struct VMContext* ctx, const uint32_t i){}
-void puti(struct VMContext* ctx, const uint32_t i){}
-void add(struct VMContext* ctx, const uint32_t i){}
-void sub(struct VMContext* ctx, const uint32_t i){}
-void gt(struct VMContext* ctx, const uint32_t i){}
-void ge(struct VMContext* ctx, const uint32_t i){}
-void eq(struct VMContext* ctx, const uint32_t i){}
-void ite(struct VMContext* ctx, const uint32_t i){}
-void jump(struct VMContext* ctx, const uint32_t i){}
-void puts(struct VMContext* ctx, const uint32_t i){}
+void move(struct VMContext* ctx, const uint32_t i){
+    ctx->r[EXTRACT_B1(i)].value = ctx->r[EXTRACT_B2(i)].value;
+}
+
+void puti(struct VMContext* ctx, const uint32_t i){
+    ctx->r[EXTRACT_B1(i)].value = EXTRACT_B2(i)    
+}
+
+void add(struct VMContext* ctx, const uint32_t i){
+    ctx->r[EXTRACT_B1(i)].value = ctx->r[EXTRACT_B2(i)].value + ctx->r[EXTRACT_B3(i)].value;
+}
+
+void sub(struct VMContext* ctx, const uint32_t i){
+    ctx->r[EXTRACT_B1(i)].value = ctx->r[EXTRACT_B2(i)].value - ctx->r[EXTRACT_B3(i)].value;
+}
+
+void gt(struct VMContext* ctx, const uint32_t i){   
+    uint32_t left = ctx->r[EXTRACT_B2(i)].value;
+    uint32_t right = ctx->r[EXTRACT_B3(i)].value;
+    if(left > right)
+	ctx->r[EXTRACT_B1(i)].value = 1;
+    else	
+	ctx->r[EXTRACT_B1(i)].value = 0;
+}
+
+void ge(struct VMContext* ctx, const uint32_t i){
+    uint32_t left = ctx->r[EXTRACT_B2(i)].value;
+    uint32_t right = ctx->r[EXTRACT_B3(i)].value;
+    if(left < right)
+	ctx->r[EXTRACT_B1(i)].value = 0;
+    else	
+	ctx->r[EXTRACT_B1(i)].value = 1;
+}
+
+void eq(struct VMContext* ctx, const uint32_t i){
+    uint32_t left = ctx->r[EXTRACT_B2(i)].value;
+    uint32_t right = ctx->r[EXTRACT_B3(i)].value;
+    if(left == right)
+	ctx->r[EXTRACT_B1(i)].value = 1;
+    else	
+	ctx->r[EXTRACT_B1(i)].value = 0;
+}
+
+void ite(struct VMContext* ctx, const uint32_t i){
+
+}
+void jump(struct VMContext* ctx, const uint32_t i){
+
+}
+
+void puts(struct VMContext* ctx, const uint32_t i){
+
+}
+
+void gets(struct VMContext* ctx, const uint32_t i){
+
+}
 
 void initFuncs(FunPtr *f, uint32_t cnt) {
     uint32_t i;
@@ -86,7 +133,7 @@ int main(int argc, char** argv) {
     uint32_t* pc;
     uint32_t len = 0;
     ptr = (uint32_t*)malloc(8192);
-	
+    memset(ptr, 0, 8192);	
     // There should be at least one argument.
     if (argc < 2) usageExit();
 

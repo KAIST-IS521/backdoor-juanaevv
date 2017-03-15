@@ -11,7 +11,8 @@
 
 // Global variable that indicates if the process is running.
 static bool is_running = true;
-uint32_t* ptr = NULL;
+uint8_t* ptr = NULL;
+uint32_t* pc; // change pc to glbal var.
 
 void usageExit() {
     // TODO: show usage
@@ -24,12 +25,12 @@ void halt(struct VMContext* ctx, const uint32_t i){
 }
 
 void load(struct VMContext* ctx, const uint32_t i){
-    uint32_t value = EXTRACT_B3(*(ptr+(ctx->r[EXTRACT_B2(i)].value)/4));
+    uint32_t value = 0x00000000 | EXTRACT_B3(*(ptr+(ctx->r[EXTRACT_B2(i)].value)));
     ctx->r[EXTRACT_B1(i)].value = value;	
 }
 
 void store(struct VMContext* ctx, const uint32_t i){
-    *(ptr+(ctx->r[EXTRACT_B1(i)].value)/4) = EXTRACT_B3(ctx->r[EXTRA_B2(i)].value); 	
+    *(ptr+(ctx->r[EXTRACT_B1(i)].value)) = 0x00000000 | EXTRACT_B3(ctx->r[EXTRA_B2(i)].value); 	
 }
 
 void move(struct VMContext* ctx, const uint32_t i){
@@ -37,14 +38,15 @@ void move(struct VMContext* ctx, const uint32_t i){
 }
 
 void puti(struct VMContext* ctx, const uint32_t i){
-    ctx->r[EXTRACT_B1(i)].value = EXTRACT_B2(i)    
+    ctx->r[EXTRACT_B1(i)].value = EXTRACT_B2(i);
+    ctx->r[EXTRACT_B1(i)].value &= 0x000000FF;    
 }
 
-void add(struct VMContext* ctx, const uint32_t i){
+void add(struct VMContext* ctx, const uint32_t i){ //handle overflow.
     ctx->r[EXTRACT_B1(i)].value = ctx->r[EXTRACT_B2(i)].value + ctx->r[EXTRACT_B3(i)].value;
 }
 
-void sub(struct VMContext* ctx, const uint32_t i){
+void sub(struct VMContext* ctx, const uint32_t i){ //handle overflow.
     ctx->r[EXTRACT_B1(i)].value = ctx->r[EXTRACT_B2(i)].value - ctx->r[EXTRACT_B3(i)].value;
 }
 
@@ -52,7 +54,7 @@ void gt(struct VMContext* ctx, const uint32_t i){
     uint32_t left = ctx->r[EXTRACT_B2(i)].value;
     uint32_t right = ctx->r[EXTRACT_B3(i)].value;
     if(left > right)
-	ctx->r[EXTRACT_B1(i)].value = 1;
+	ctx->r[EXTRACT_B1(i)].value = 0x00000001;
     else	
 	ctx->r[EXTRACT_B1(i)].value = 0;
 }
@@ -63,31 +65,45 @@ void ge(struct VMContext* ctx, const uint32_t i){
     if(left < right)
 	ctx->r[EXTRACT_B1(i)].value = 0;
     else	
-	ctx->r[EXTRACT_B1(i)].value = 1;
+	ctx->r[EXTRACT_B1(i)].value = 0x00000001;
 }
 
 void eq(struct VMContext* ctx, const uint32_t i){
     uint32_t left = ctx->r[EXTRACT_B2(i)].value;
     uint32_t right = ctx->r[EXTRACT_B3(i)].value;
     if(left == right)
-	ctx->r[EXTRACT_B1(i)].value = 1;
+	ctx->r[EXTRACT_B1(i)].value = 0x00000001;
     else	
 	ctx->r[EXTRACT_B1(i)].value = 0;
 }
 
 void ite(struct VMContext* ctx, const uint32_t i){
-
+    if(ctx->r[EXTRACT_B1(i)].value > 0){
+      	EXTRACT_B2(i) << 2;
+        EXTRACT_B2(i) -= 0x04;
+	*pc = 0x00000000 | EXTRACT_B2(i);
+    }	
+    else(ctx->r[EXTRACT_B1(i)].value == 0){
+  	EXTRACT_B3(i) << 2;
+	EXTRACT_B3(i) -= 0x04;
+	*pc = 0x00000000 | EXTRACT_B3(i);
+    }
 }
 void jump(struct VMContext* ctx, const uint32_t i){
-
+    EXTRACT_B1(i) << 2;
+    EXTRACT_B1(i) -= 0x04;
+    *pc = 0x00000000 | EXTRACT_B1(i);
 }
 
-void puts(struct VMContext* ctx, const uint32_t i){
-
+void puts(struct VMContext* ctx, const uint32_t i){ //print char array before '\0'
+    uint8_t * str = (ptr+(ctx->r[EXTRACT_B1(i)].value));
+    puts(str);
 }
 
 void gets(struct VMContext* ctx, const uint32_t i){
-
+    uint8_t * str = NULL;
+    gets(str);
+    ptr+(ctx->r[EXTRACT_B1(i)].value) = str; 
 }
 
 void initFuncs(FunPtr *f, uint32_t cnt) {
@@ -130,15 +146,15 @@ int main(int argc, char** argv) {
     Reg r[NUM_REGS];
     FunPtr f[NUM_FUNCS];
     FILE* bytecode;
-    uint32_t* pc;
     uint32_t len = 0;
-    ptr = (uint32_t*)malloc(8192);
-    memset(ptr, 0, 8192);	
+    ptr = (uint8_t*)malloc(8192);
+    memset(ptr, 0, 8192);
+	
     // There should be at least one argument.
     if (argc < 2) usageExit();
 
     // Initialize registers.
-    initRegs(r, NUM_REGS);
+	    initRegs(r, NUM_REGS);
     // Initialize interpretation functions.
     initFuncs(f, NUM_FUNCS);
     // Initialize VM context.

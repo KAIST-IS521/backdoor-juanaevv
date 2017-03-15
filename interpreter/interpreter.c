@@ -11,12 +11,37 @@
 
 // Global variable that indicates if the process is running.
 static bool is_running = true;
+uint32_t* ptr = NULL;
 
 void usageExit() {
     // TODO: show usage
     printf("Set argument with just one bytecode!\n");
     exit(1);
 }
+
+void halt(struct VMContext* ctx, const uint32_t i){
+    exit(1);
+}
+
+void load(struct VMContext* ctx, const uint32_t i){
+    uint32_t value = EXTRACT_B3(*(ptr+(ctx->r[EXTRACT_B2(i)].value/4)));
+    ctx->r[EXTRACT_B1(i)].value = value;	
+}
+
+void store(struct VMContext* ctx, const uint32_t i){
+    *(ptr+(ctx->r[EXTRA_B1(i)].value/4)) = B0(ctx->r[EXTRA_B2(i)].value); 	
+}
+
+void move(struct VMContext* ctx, const uint32_t i){}
+void puti(struct VMContext* ctx, const uint32_t i){}
+void add(struct VMContext* ctx, const uint32_t i){}
+void sub(struct VMContext* ctx, const uint32_t i){}
+void gt(struct VMContext* ctx, const uint32_t i){}
+void ge(struct VMContext* ctx, const uint32_t i){}
+void eq(struct VMContext* ctx, const uint32_t i){}
+void ite(struct VMContext* ctx, const uint32_t i){}
+void jump(struct VMContext* ctx, const uint32_t i){}
+void puts(struct VMContext* ctx, const uint32_t i){}
 
 void initFuncs(FunPtr *f, uint32_t cnt) {
     uint32_t i;
@@ -59,7 +84,8 @@ int main(int argc, char** argv) {
     FunPtr f[NUM_FUNCS];
     FILE* bytecode;
     uint32_t* pc;
-    uint32_t len=0;
+    uint32_t len = 0;
+    ptr = (uint32_t*)malloc(8192);
 	
     // There should be at least one argument.
     if (argc < 2) usageExit();
@@ -89,7 +115,7 @@ int main(int argc, char** argv) {
 	// If we reach end of file, we must escape loop.
       stepVMContext(&vm, &pc);
       
-      if(pc==NULL) // if instrcution fetch is finish, terminate program.
+         if(pc==NULL) // if instrcution fetch is finish, terminate program.
       is_running = false;
     }
 

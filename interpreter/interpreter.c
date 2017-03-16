@@ -102,9 +102,10 @@ void ite(struct VMContext* ctx, const uint32_t i){
 }
 
 void jump(struct VMContext* ctx, const uint32_t i){
-    EXTRACT_B1(i) << 2;
-    EXTRACT_B1(i) -= 0x04;
-    *pc = 0x000000FF & EXTRACT_B1(i);
+    uint32_t temp = 0x000000FF & EXTRACT_B1(i);
+    temp = temp << 2;
+    temp -= 0x08;
+    pc = (uint32_t*)(code+temp);
 }
 
 void puts(struct VMContext* ctx, const uint32_t i){ //print char array before '\0'

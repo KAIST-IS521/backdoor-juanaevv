@@ -4,15 +4,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include "minivm.h"
+#include "minivm.c"
 
 #define NUM_REGS   (256)
 #define NUM_FUNCS  (256)
 
 // Global variable that indicates if the process is running.
 static bool is_running = true;
-uint8_t* ptr = NULL;
-uint32_t* pc; // change pc to glbal var.
+
+uint8_t* ptr = NULL; // for heap memory section
+uint32_t* pc; // change pc to global var
+uint8_t* code =NULL; // for code save section
 
 void usageExit() {
     // TODO: show usage
@@ -154,8 +158,8 @@ int main(int argc, char** argv) {
     // There should be at least one argument.
     if (argc < 2) usageExit();
 
-    // Initialize registers.
-	    initRegs(r, NUM_REGS);
+    // Initialize registers
+    initRegs(r, NUM_REGS);
     // Initialize interpretation functions.
     initFuncs(f, NUM_FUNCS);
     // Initialize VM context.
@@ -171,18 +175,23 @@ int main(int argc, char** argv) {
     fseek(bytecode,0,SEEK_END);
     len = ftell(bytecode);  //find size of file.
     fseek(bytecode,0,SEEK_SET);
+    code = (uint8_t*)malloc(len+4); // Get the bytecode and add 4 for one more increment at last 
 
-    fread(pc,4,len/4,bytecode);//Connect file pointer and integer pointer(Initialize pc)
+    fread(code,1,len,bytecode);//Connect file pointer and chracter pointer
+    pc = (uint32_t*)code;//Initialize PC
 
     while (is_running) {
         // TODO: Read 4-byte bytecode, and set the pc accordingly
 	// If we reach end of file, we must escape loop.
-      stepVMContext(&vm, &pc);
+      	stepVMContext(&vm, &pc);
       
-         if(pc==NULL) // if instrcution fetch is finish, terminate program.
-      is_running = false;
+    	if((pc+1)==NULL){ // if instrcution fetch is finish, terminate program.
+             is_running = false;
+             print("code is finished\n");
+        }	     
     }
-
+    free(ptr);
+    free(code);
     fclose(bytecode);
 
     // Zero indicates normal termination.

@@ -83,17 +83,24 @@ void eq(struct VMContext* ctx, const uint32_t i){
 }
 
 void ite(struct VMContext* ctx, const uint32_t i){
+    
+    uint32_t temp =0;
+ 
     if(ctx->r[EXTRACT_B1(i)].value > 0){
-      	EXTRACT_B2(i) << 2;
-        EXTRACT_B2(i) -= 0x04;
-	*pc = 0x000000FF & EXTRACT_B2(i);
+      	temp = 0x000000FF & EXTRACT_B2(i);
+        temp = temp << 2;
+        temp -= 0x08; // when function is finshed, there is pc increment stage and sync with real code line.
+	pc = (uint32_t*)(code+temp);
     }	
+
     else(ctx->r[EXTRACT_B1(i)].value == 0){
-  	EXTRACT_B3(i) << 2;
-	EXTRACT_B3(i) -= 0x04;
-	*pc = 0x000000FF & EXTRACT_B3(i);
+  	temp = 0x000000FF & EXTRACT_B3(i);
+	temp = temp << 2;
+	temp -= 0x08;
+	pc = (uint32_t*)(code + temp);
     }
 }
+
 void jump(struct VMContext* ctx, const uint32_t i){
     EXTRACT_B1(i) << 2;
     EXTRACT_B1(i) -= 0x04;

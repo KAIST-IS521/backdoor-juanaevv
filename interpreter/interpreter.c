@@ -25,12 +25,13 @@ void halt(struct VMContext* ctx, const uint32_t i){
 }
 
 void load(struct VMContext* ctx, const uint32_t i){
-    uint32_t value = 0x00000000 | EXTRACT_B3(*(ptr+(ctx->r[EXTRACT_B2(i)].value)));
+    uint32_t value = 0x000000FF & *(ptr+(ctx->r[EXTRACT_B2(i)].value));
     ctx->r[EXTRACT_B1(i)].value = value;	
 }
 
 void store(struct VMContext* ctx, const uint32_t i){
-    *(ptr+(ctx->r[EXTRACT_B1(i)].value)) = 0x00000000 | EXTRACT_B3(ctx->r[EXTRA_B2(i)].value); 	
+    const uint8_t temp = ctx->r[EXTRACT_B2(i)].value;
+    *(ptr+(ctx->r[EXTRACT_B1(i)].value)) = 0x000000FF & temp; 	
 }
 
 void move(struct VMContext* ctx, const uint32_t i){
@@ -81,18 +82,18 @@ void ite(struct VMContext* ctx, const uint32_t i){
     if(ctx->r[EXTRACT_B1(i)].value > 0){
       	EXTRACT_B2(i) << 2;
         EXTRACT_B2(i) -= 0x04;
-	*pc = 0x00000000 | EXTRACT_B2(i);
+	*pc = 0x000000FF & EXTRACT_B2(i);
     }	
     else(ctx->r[EXTRACT_B1(i)].value == 0){
   	EXTRACT_B3(i) << 2;
 	EXTRACT_B3(i) -= 0x04;
-	*pc = 0x00000000 | EXTRACT_B3(i);
+	*pc = 0x000000FF & EXTRACT_B3(i);
     }
 }
 void jump(struct VMContext* ctx, const uint32_t i){
     EXTRACT_B1(i) << 2;
     EXTRACT_B1(i) -= 0x04;
-    *pc = 0x00000000 | EXTRACT_B1(i);
+    *pc = 0x000000FF & EXTRACT_B1(i);
 }
 
 void puts(struct VMContext* ctx, const uint32_t i){ //print char array before '\0'

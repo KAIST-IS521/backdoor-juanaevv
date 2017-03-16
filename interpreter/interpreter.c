@@ -108,15 +108,28 @@ void jump(struct VMContext* ctx, const uint32_t i){
     pc = (uint32_t*)(code+temp);
 }
 
-void puts(struct VMContext* ctx, const uint32_t i){ //print char array before '\0'
+void put(struct VMContext* ctx, const uint32_t i){ //print char array before '\0'
     uint8_t * str = (ptr+(ctx->r[EXTRACT_B1(i)].value));
-    puts(str);
+    puts((const char*) str);
 }
 
-void gets(struct VMContext* ctx, const uint32_t i){
-    uint8_t * str = NULL;
-    gets(str);
-    ptr+(ctx->r[EXTRACT_B1(i)].value) = str; 
+void get(struct VMContext* ctx, const uint32_t i){
+    char str[100]; //for storing user's input
+    char * temp = NULL;
+    uint8_t move =0, j=0, count =0;
+ 
+    fgets(str,100,stdin); //gets isn't stable
+    temp = str;
+
+    for(; *temp != '\0' ;temp++)
+  	count++; //calculate user's input length
+    *(temp-1) = '\0'; //delete '\n' with '\0'
+    move = ctx->r[EXTRACT_B1(i)].value;
+
+    for(;j<count;j++){
+  	*(ptr+move) = str[j];//convey user's input into heap memory
+  	move++;
+    }
 }
 
 void initFuncs(FunPtr *f, uint32_t cnt) {

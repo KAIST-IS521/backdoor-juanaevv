@@ -93,7 +93,7 @@ void ite(struct VMContext* ctx, const uint32_t i){
 	pc = (uint32_t*)(code+temp);
     }	
 
-    else(ctx->r[EXTRACT_B1(i)].value == 0){
+    else if(ctx->r[EXTRACT_B1(i)].value == 0){
   	temp = 0x000000FF & EXTRACT_B3(i);
 	temp = temp << 2;
 	temp -= 0x08;
@@ -150,8 +150,8 @@ void initFuncs(FunPtr *f, uint32_t cnt) {
     f[0x90] = eq;
     f[0xa0] = ite;
     f[0xb0] = jump;
-    f[0xc0] = puts;
-    f[0xd0] = gets;
+    f[0xc0] = put;
+    f[0xd0] = get;
 
     // TODO: initialize function pointers
     // f[0x00] = halt;
@@ -208,7 +208,7 @@ int main(int argc, char** argv) {
       
     	if((pc+1)==NULL){ // if instrcution fetch is finish, terminate program.
              is_running = false;
-             print("code is finished\n");
+             printf("code is finished\n");
         }	     
     }
     free(ptr);

